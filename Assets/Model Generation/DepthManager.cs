@@ -26,7 +26,27 @@ public class DepthManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (depthReader != null) {
-
+            var frame = depthReader.AcquireLatestFrame();
+            if (frame != null)
+            {
+                frame.CopyFrameDataToArray(depthData);
+                frame.Dispose();
+                frame = null;
+            }
         }
 	}
+
+    void OnApplicationQuit() {
+        if (depthReader != null) {
+            depthReader.Dispose();
+            depthReader = null;
+        }
+
+        if (sensor != null) {
+            if (sensor.IsOpen) {
+                sensor.Close();
+            }
+            sensor = null;
+        }
+    }
 }
