@@ -18,6 +18,7 @@ namespace DistantChess {
         private Texture2D colorTexture;
         private ushort[] depthData;
         private byte[] colorData;
+        private byte[] bodyIndexData;
 
         public Texture2D getColorTexture() {
             return colorTexture;
@@ -25,6 +26,10 @@ namespace DistantChess {
 
         public ushort[] getDepthData() {
             return depthData;
+        }
+
+        public byte[] getBodyIndexData() {
+            return bodyIndexData;
         }
 
 	    // Use this for initialization
@@ -47,7 +52,8 @@ namespace DistantChess {
 
                 //Init fields related to BodyIndex
                 // TODO
-
+                var bodyIndexFrameDesc = kinectSensor.BodyIndexFrameSource.FrameDescription;
+                bodyIndexData = new byte[bodyIndexFrameDesc.LengthInPixels];
 
                 if (kinectSensor.IsOpen == false) {
                     kinectSensor.Open();
@@ -77,6 +83,14 @@ namespace DistantChess {
                         depthFrame.CopyFrameDataToArray(depthData);
                         depthFrame.Dispose();
                         depthFrame = null;
+                    }
+
+                    // Update the bodyIndexFrame
+                    var bodyIndexFrame = frame.BodyIndexFrameReference.AcquireFrame();
+                    if (bodyIndexFrame != null) {
+                        bodyIndexFrame.CopyFrameDataToArray(bodyIndexData);
+                        bodyIndexFrame.Dispose();
+                        bodyIndexFrame = null;
                     }
                 }
                 frame = null;
