@@ -19,6 +19,14 @@ namespace DistantChess {
         private ushort[] depthData;
         private byte[] colorData;
 
+        public Texture2D getColorTexture() {
+            return colorTexture;
+        }
+
+        public ushort[] getDepthData() {
+            return depthData;
+        }
+
 	    // Use this for initialization
 	    void Start () {
             kinectSensor = KinectSensor.GetDefault();
