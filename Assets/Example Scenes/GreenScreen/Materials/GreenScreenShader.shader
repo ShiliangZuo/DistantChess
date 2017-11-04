@@ -12,7 +12,8 @@ CGPROGRAM
 
 #include "UnityCG.cginc"
 
-Texture2D _MainTex;
+//Texture2D _MainTex;
+UNITY_DECLARE_TEX2D(_MainTex);
 
 sampler SampleType;
 
@@ -56,7 +57,8 @@ float4 frag (ps_input i, in uint id : SV_InstanceID) : COLOR
 		float player = bodyIndexBuffer[(int)depthCoordinates[colorIndex].x + (int)(depthCoordinates[colorIndex].y * 512)];
 		if (player != 255)
 		{
-			o = _MainTex.Sample(SampleType, i.tex);
+			//o = _MainTex.Sample(SampleType, i.tex);
+			o = UNITY_SAMPLE_TEX2D(_MainTex, i.tex);
 		}
 	}
 	
