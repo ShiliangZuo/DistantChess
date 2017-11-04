@@ -8,12 +8,14 @@ namespace DistantChess {
     public class MeshView : MonoBehaviour {
 
         private KinectSensor kinectSensor;
+        public GameObject multiSourceManagerObj;
 
         private Mesh mesh;
         private Vector3[] vertices;
         private Vector2[] UV;
         private int[] triangles;
         private const int downSampleSize = 4;
+        private MultiSourceManager multiSrcManager;
 
         // Use this for initialization
         void Start() {
@@ -30,6 +32,20 @@ namespace DistantChess {
         // Update is called once per frame
         void Update() {
             // Lets first try doing a greenscreen effect
+            // TODO
+            multiSrcManager = multiSourceManagerObj.GetComponent<MultiSourceManager>();
+            if (multiSrcManager == null) {
+                Debug.Log("Can not find multiSrcManager ... !!!");
+                return;
+            }
+
+        }
+
+        private Texture2D GetFilteredColorTexture() {
+            Texture2D originalTexture = multiSrcManager.GetColorTexture();
+            // TODO
+            // Do Greenscreen
+            return originalTexture;
         }
 
         void CreateMesh(int width, int height) {

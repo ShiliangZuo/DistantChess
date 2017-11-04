@@ -20,15 +20,15 @@ namespace DistantChess {
         private byte[] colorData;
         private byte[] bodyIndexData;
 
-        public Texture2D getColorTexture() {
+        public Texture2D GetColorTexture() {
             return colorTexture;
         }
 
-        public ushort[] getDepthData() {
+        public ushort[] GetDepthData() {
             return depthData;
         }
 
-        public byte[] getBodyIndexData() {
+        public byte[] GetBodyIndexData() {
             return bodyIndexData;
         }
 
