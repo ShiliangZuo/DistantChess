@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Windows.Kinect;
+using System.Runtime.InteropServices;
 
 namespace DistantChess {
 
@@ -14,11 +15,14 @@ namespace DistantChess {
         public int colorHeight { get; private set; }
 
         private KinectSensor kinectSensor;
+        private CoordinateMapper coordinateMapper;
         private MultiSourceFrameReader multiSourceReader;
         private Texture2D colorTexture;
         private ushort[] depthData;
-        private byte[] colorData;
         private byte[] bodyIndexData;
+        private DepthSpacePoint[] depthCoords;
+
+        private byte[] colorData;
 
         public Texture2D GetColorTexture() {
             return colorTexture;
@@ -32,12 +36,17 @@ namespace DistantChess {
             return bodyIndexData;
         }
 
+        public DepthSpacePoint[] GetDepthCoords() {
+            return depthCoords;
+        }
+
 	    // Use this for initialization
 	    void Start () {
             kinectSensor = KinectSensor.GetDefault();
             if (kinectSensor != null) {
                 multiSourceReader = kinectSensor.OpenMultiSourceFrameReader(
                     FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.BodyIndex);
+                coordinateMapper = kinectSensor.CoordinateMapper;
 
                 // Init fields related to ColorFrame
                 var colorFrameDesc = kinectSensor.ColorFrameSource.CreateFrameDescription(ColorImageFormat.Rgba);
@@ -54,6 +63,9 @@ namespace DistantChess {
                 // TODO
                 var bodyIndexFrameDesc = kinectSensor.BodyIndexFrameSource.FrameDescription;
                 bodyIndexData = new byte[bodyIndexFrameDesc.LengthInPixels];
+
+                //Init depthCoords
+                depthCoords = new DepthSpacePoint[colorWidth * colorHeight];
 
                 if (kinectSensor.IsOpen == false) {
                     kinectSensor.Open();
@@ -92,6 +104,9 @@ namespace DistantChess {
                         bodyIndexFrame.Dispose();
                         bodyIndexFrame = null;
                     }
+
+                    // Update depthCoords from depthData
+                    coordinateMapper.MapColorFrameToDepthSpace(depthData, depthCoords);
                 }
                 frame = null;
             }

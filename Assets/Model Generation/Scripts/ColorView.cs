@@ -23,20 +23,7 @@ namespace DistantChess {
                 return;
             }
 
-            gameObject.GetComponent<Renderer>().material.mainTexture = this.GetFilteredColorTexture();
-        }
-
-        private Texture2D GetFilteredColorTexture() {
-            Texture2D texture = multiSrcManager.GetColorTexture();
-            for (int x = 0; x < 4; ++x) {
-                for (int y = 0; y < 2; ++y) {
-                    Color green = Color.green;
-                    texture.SetPixel(x, y, green);
-                    texture.Apply();
-                }
-                //Debug.Log("Setting green");
-            }
-            return texture;
+            gameObject.GetComponent<Renderer>().material.mainTexture = multiSrcManager.GetColorTexture();
         }
     }
 }
