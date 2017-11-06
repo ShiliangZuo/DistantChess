@@ -41,7 +41,7 @@ namespace DistantChess {
         }
 
 	    // Use this for initialization
-	    void Start () {
+	    void Awake () {
             kinectSensor = KinectSensor.GetDefault();
             if (kinectSensor != null) {
                 multiSourceReader = kinectSensor.OpenMultiSourceFrameReader(
