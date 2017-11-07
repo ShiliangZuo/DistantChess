@@ -52,8 +52,6 @@ namespace DistantChess {
         // Update is called once per frame
         void Update() {
 
-            multiSrcManager = multiSourceManagerObj.GetComponent<MultiSourceManager>();
-
             gameObject.GetComponent<Renderer>().material.mainTexture = multiSrcManager.GetColorTexture();
             depthPoints = multiSrcManager.GetDepthCoords();
             bodyIndexPoints = multiSrcManager.GetBodyIndexData();

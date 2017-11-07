@@ -27,25 +27,18 @@ namespace DistantChess {
                     kinectSensor.Open();
                 }
             }
+            multiSrcManager = multiSourceManagerObj.GetComponent<MultiSourceManager>();
         }
 
         // Update is called once per frame
         void Update() {
             // Lets first try doing a greenscreen effect
             // TODO
-            multiSrcManager = multiSourceManagerObj.GetComponent<MultiSourceManager>();
             if (multiSrcManager == null) {
                 Debug.Log("Can not find multiSrcManager ... !!!");
                 return;
             }
 
-        }
-
-        private Texture2D GetFilteredColorTexture() {
-            Texture2D originalTexture = multiSrcManager.GetColorTexture();
-            // TODO
-            // Do Greenscreen
-            return originalTexture;
         }
 
         void CreateMesh(int width, int height) {

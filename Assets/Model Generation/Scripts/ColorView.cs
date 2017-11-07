@@ -13,11 +13,11 @@ namespace DistantChess {
         // Use this for initialization
         void Start() {
             gameObject.GetComponent<Renderer>().material.SetTextureScale("_MainTex", new Vector2(-1, 1));
+            multiSrcManager = multiSourceManagerObj.GetComponent<MultiSourceManager>();
         }
 
         // Update is called once per frame
         void Update() {
-            multiSrcManager = multiSourceManagerObj.GetComponent<MultiSourceManager>();
             if (multiSrcManager == null) {
                 Debug.Log("Cannot find multiScrManager ... !!!");
                 return;

@@ -407,7 +407,7 @@ GameObject:
   - component: {fileID: 1889517191}
   - component: {fileID: 1889517190}
   m_Layer: 0
-  m_Name: CoordinateMapView
+  m_Name: GreenScreen View
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
