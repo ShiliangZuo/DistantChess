@@ -20,6 +20,12 @@ namespace DistantChess {
         private MultiSourceManager multiSrcManager;
         private CoordinateMapper mapper;
 
+        private ComputeBuffer depthCoordsBuffer;
+        private ComputeBuffer bodyIndexBuffer;
+
+        DepthSpacePoint[] depthPoints;
+        byte[] bodyIndexPoints;
+
         // Use this for initialization
         void Start() {
             kinectSensor = KinectSensor.GetDefault();
@@ -32,6 +38,18 @@ namespace DistantChess {
                 }
             }
             multiSrcManager = multiSourceManagerObj.GetComponent<MultiSourceManager>();
+
+            depthPoints = multiSrcManager.GetDepthCoords();
+            if (depthPoints != null) {
+                depthCoordsBuffer = new ComputeBuffer(depthPoints.Length, sizeof(float) * 2);
+                this.gameObject.GetComponent<Renderer>().material.SetBuffer("depthCoordinates", depthCoordsBuffer);
+            }
+
+            bodyIndexPoints = multiSrcManager.GetBodyIndexData();
+            if (bodyIndexPoints != null) {
+                bodyIndexBuffer = new ComputeBuffer(bodyIndexPoints.Length, sizeof(float));
+                this.gameObject.GetComponent<Renderer>().material.SetBuffer("bodyIndexBuffer", bodyIndexBuffer);
+            }
         }
 
         // Update is called once per frame
@@ -45,6 +63,19 @@ namespace DistantChess {
             RefreshData(multiSrcManager.GetDepthData(),
                 multiSrcManager.colorWidth,
                 multiSrcManager.colorHeight);
+
+            //Depth and BodyIndex Buffer
+            depthPoints = multiSrcManager.GetDepthCoords();
+            bodyIndexPoints = multiSrcManager.GetBodyIndexData();
+
+            depthCoordsBuffer.SetData(depthPoints);
+
+            float[] buffer = new float[512 * 424];
+            for (int i = 0; i < bodyIndexPoints.Length; ++i) {
+                buffer[i] = (float)bodyIndexPoints[i];
+            }
+            bodyIndexBuffer.SetData(buffer);
+            buffer = null;
         }
 
         void CreateMesh(int width, int height) {
@@ -131,6 +162,21 @@ namespace DistantChess {
             }
 
             return sum / 16;
+        }
+
+        private void ReleaseBuffers() {
+            if (depthCoordsBuffer != null) depthCoordsBuffer.Release();
+            depthCoordsBuffer = null;
+
+            if (bodyIndexBuffer != null) bodyIndexBuffer.Release();
+            bodyIndexBuffer = null;
+
+            depthPoints = null;
+            bodyIndexPoints = null;
+        }
+
+        void OnDisable() {
+            ReleaseBuffers();
         }
 
     }
