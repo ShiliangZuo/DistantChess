@@ -15,13 +15,17 @@ namespace DistantChess {
         private Vector2[] UV;
         private int[] triangles;
         private const int downSampleSize = 4;
+        private const double depthScale = 0.1f;
+
         private MultiSourceManager multiSrcManager;
+        private CoordinateMapper mapper;
 
         // Use this for initialization
         void Start() {
             kinectSensor = KinectSensor.GetDefault();
             if (kinectSensor != null) {
                 var frameDesc = kinectSensor.DepthFrameSource.FrameDescription;
+                mapper = kinectSensor.CoordinateMapper;
                 CreateMesh(frameDesc.Width / downSampleSize, frameDesc.Height / downSampleSize);
                 if (!kinectSensor.IsOpen) {
                     kinectSensor.Open();
@@ -32,13 +36,15 @@ namespace DistantChess {
 
         // Update is called once per frame
         void Update() {
-            // Lets first try doing a greenscreen effect
             // TODO
             if (multiSrcManager == null) {
                 Debug.Log("Can not find multiSrcManager ... !!!");
                 return;
             }
-
+            gameObject.GetComponent<Renderer>().material.mainTexture = multiSrcManager.GetColorTexture();
+            RefreshData(multiSrcManager.GetDepthData(),
+                multiSrcManager.colorWidth,
+                multiSrcManager.colorHeight);
         }
 
         void CreateMesh(int width, int height) {
@@ -46,7 +52,7 @@ namespace DistantChess {
             this.GetComponent<MeshFilter>().mesh = mesh;
             vertices = new Vector3[width * height];
             UV = new Vector2[width * height];
-            triangles = new int[width * height * 6]; // Multiply by 6 cuz there're 2 triangles in each pixel, each 3 vertices
+            triangles = new int[(width-1) * (height-1) * 6]; // Multiply by 6 cuz there're 2 triangles in each pixel, each 3 vertices
 
             int triangleIndex = 0;
             for (int y = 0; y < height; ++y) {
@@ -79,6 +85,53 @@ namespace DistantChess {
             mesh.RecalculateNormals();
         }
 
+        void RefreshData(ushort[] depthData, int colorWidth, int colorHeight) {
+            var frameDesc = kinectSensor.DepthFrameSource.FrameDescription;
+
+            ColorSpacePoint[] colorSpace = new ColorSpacePoint[depthData.Length];
+            mapper.MapDepthFrameToColorSpace(depthData, colorSpace);
+
+            for (int y = 0; y < frameDesc.Height; y += downSampleSize) {
+                for (int x = 0; x < frameDesc.Width; x += downSampleSize) {
+                    int indexX = x / downSampleSize;
+                    int indexY = y / downSampleSize;
+                    int smallIndex = (indexY * (frameDesc.Width / downSampleSize)) + indexX;
+
+                    double avg = GetAvg(depthData, x, y, frameDesc.Width, frameDesc.Height);
+
+                    avg = avg * depthScale;
+
+                    vertices[smallIndex].z = (float)avg;
+
+                    // Update UV mapping with CDRP
+                    var colorSpacePoint = colorSpace[(y * frameDesc.Width) + x];
+                    UV[smallIndex] = new Vector2(colorSpacePoint.X / colorWidth, colorSpacePoint.Y / colorHeight);
+                }
+            }
+
+            mesh.vertices = vertices;
+            mesh.uv = UV;
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+        }
+
+        double GetAvg(ushort[] depthData, int x, int y, int width, int height) {
+            double sum = 0.0;
+
+            for (int y1 = y; y1 < y + 4; y1++) {
+                for (int x1 = x; x1 < x + 4; x1++) {
+                    int fullIndex = (y1 * width) + x1;
+
+                    if (depthData[fullIndex] == 0)
+                        sum += 4500;
+                    else
+                        sum += depthData[fullIndex];
+
+                }
+            }
+
+            return sum / 16;
+        }
 
     }
 
